@@ -11,6 +11,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import wc.dev.khoand.worldcup.Fragment.BottomNavigationFragment;
+import wc.dev.khoand.worldcup.Fragment.Country;
 import wc.dev.khoand.worldcup.Fragment.MatchSchedule;
 
 public class MainActivity extends AppCompatActivity {
@@ -61,12 +62,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void buildListFrag() {
         MatchSchedule matchSchedule = new MatchSchedule();
-        BottomNavigationFragment frag_dash = buildFragment("DashBoard");
-        BottomNavigationFragment frag_noti = buildFragment("Notify");
+        Country country = new Country();
+        BottomNavigationFragment frag_notify = buildFragment("Notify");
 
         fragments.add(matchSchedule);
-        fragments.add(frag_dash);
-        fragments.add(frag_noti);
+        fragments.add(country);
+        fragments.add(frag_notify);
     }
 
     private BottomNavigationFragment buildFragment(String title) {

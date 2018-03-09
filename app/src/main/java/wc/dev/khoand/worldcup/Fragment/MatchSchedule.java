@@ -10,36 +10,32 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TabHost;
-import android.widget.TableLayout;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import wc.dev.khoand.worldcup.APIClient.APIService;
 import wc.dev.khoand.worldcup.APIClient.APIUtils;
 import wc.dev.khoand.worldcup.Items.FixtureItem;
 import wc.dev.khoand.worldcup.MainItem.MatchItem;
 import wc.dev.khoand.worldcup.R;
-import wc.dev.khoand.worldcup.Utils.FunctionUtils;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MatchSchedule extends Fragment {
+public class MatchSchedule extends BaseFragment {
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
     private MatchItem matchItem;
-    private APIService apiService;
     public static final String ARGS_FIXTURE = "fixture";
 
     public MatchSchedule() {
@@ -52,13 +48,13 @@ public class MatchSchedule extends Fragment {
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_match_schedule, container, false);
         tabLayout = root.findViewById(R.id.match_sch_tabs);
-        viewPager = root.findViewById(R.id.viewpager);
-        loadAPIMatchInfo();
+        viewPager = root.findViewById(R.id.match_sch_viewpager);
+        loadApiMatchInfo();
         // Inflate the layout for this fragment
         return root;
     }
 
-    private void loadAPIMatchInfo() {
+    private void loadApiMatchInfo() {
         apiService = APIUtils.getMyService();
         apiService.getMatchInfo().enqueue(new Callback<MatchItem>() {
             @Override
@@ -84,7 +80,7 @@ public class MatchSchedule extends Fragment {
 
 
     private void setupViewPaper(ViewPager viewPager) {
-        ViewPaperAdapter adapter = new ViewPaperAdapter(getActivity().getSupportFragmentManager());
+        ViewPaperMatchAdapter adapter = new ViewPaperMatchAdapter(getActivity().getSupportFragmentManager());
 //        args.putSerializable(ARGS_FIXTURE, matchItem);
         HashMap<String, ArrayList<FixtureItem>> hashMapFilter = new HashMap<>();
         ArrayList<FixtureItem> listMatch = matchItem.getFixtures();
@@ -104,24 +100,34 @@ public class MatchSchedule extends Fragment {
         Map<String, ArrayList<FixtureItem>> map = new TreeMap<>(hashMapFilter);
 
         for (Map.Entry<String, ArrayList<FixtureItem>> itemHashMap : map.entrySet()) {
-            String date = itemHashMap.getKey();
+            String strdate = itemHashMap.getKey();
             ArrayList<FixtureItem> list = itemHashMap.getValue();
 
             ScheduleItem scheduleItem = new ScheduleItem();
             Bundle args = new Bundle();
             args.putParcelableArrayList(ARGS_FIXTURE, list);
             scheduleItem.setArguments(args);
-            adapter.addFragment(scheduleItem, date);
+            Date date = Calendar.getInstance().getTime();
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                date = format.parse(strdate);
+                format = new SimpleDateFormat("MMM dd");
+                strdate = format.format(date);
+            } catch (Exception ex) {
+                strdate = format.format(date);
+                ex.printStackTrace();
+            }
+            adapter.addFragment(scheduleItem, strdate);
         }
         viewPager.setAdapter(adapter);
     }
 
-    class ViewPaperAdapter extends FragmentPagerAdapter {
+    class ViewPaperMatchAdapter extends FragmentPagerAdapter {
 
         private final ArrayList<Fragment> mFragmentList = new ArrayList<>();
         private final ArrayList<String> mFragmentTitleList = new ArrayList<>();
 
-        public ViewPaperAdapter(FragmentManager manager) {
+        public ViewPaperMatchAdapter(FragmentManager manager) {
             super(manager);
         }
 
